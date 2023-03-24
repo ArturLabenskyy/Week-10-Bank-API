@@ -53,17 +53,14 @@ AccountSchema.statics.getTotalBalance = async function (ownerId) {
             // $group stage groups the documents by the owner field and calculates the sum of balances
             $group: {
                 _id: "$owner",
-
                 totalCash: { $sum: "$cash" },
                 totalCredit: { $sum: "$credit" },
             },
         },
     ]);
 
-    // const totalBalance = arr.length > 0 ? arr[0].totalBalance : 0;
     const totalCash = aggregationArr[0].totalCash;
     const totalCredit = aggregationArr[0].totalCredit;
-
     try {
         await this.model("User").findByIdAndUpdate(ownerId, {
             totalCash: totalCash,
@@ -74,4 +71,5 @@ AccountSchema.statics.getTotalBalance = async function (ownerId) {
         throw new Error("Error updating user total balance");
     }
 };
+
 export default mongoose.model("Account", AccountSchema);

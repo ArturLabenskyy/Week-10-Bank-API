@@ -56,13 +56,11 @@ export const getAccount = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc    update a account cash
-// @route   put /api/v1/accounts/updateBalance/:id
+// @desc    update a account balance
+// @route   GET /api/v1/accounts/updateBalance/:id
 export const updateBalance = asyncHandler(async (req, res, next) => {
-    console.log(req.body);
     const accountId = req.params.id;
     const { credit = 0, cash = 0 } = req.body;
-    console.log(cash);
 
     const { credit: prevCredit, cash: prevCash } = await Account.findById(
         accountId
@@ -89,7 +87,6 @@ export const updateBalance = asyncHandler(async (req, res, next) => {
         );
     }
 
-    await Account.getTotalBalance(account.owner);
     res.status(200).json({
         success: true,
         data: `Balance was Changed`,
@@ -101,7 +98,6 @@ export const updateBalance = asyncHandler(async (req, res, next) => {
 export const deleteAccount = asyncHandler(async (req, res, next) => {
     const accountToRemoveId = req.params.id;
     const account = await Account.findById(accountToRemoveId);
-
     if (!account) {
         return next(
             new ErrorResponse(
@@ -112,9 +108,7 @@ export const deleteAccount = asyncHandler(async (req, res, next) => {
             )
         );
     }
-
     let user = await User.findById(account.owner);
-
     if (user.accounts.length === 1) {
         return next(
             new ErrorResponse(
@@ -133,9 +127,6 @@ export const deleteAccount = asyncHandler(async (req, res, next) => {
     );
 
     await account.deleteOne(); // delete the account document
-
-    await Account.getTotalBalance(account.owner);
-
     res.status(200).json({
         success: true,
         data: `Account with ID: '${accountToRemoveId}' was deleted`,
